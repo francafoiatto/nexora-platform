@@ -4,6 +4,13 @@
 
 ![Dashboard](docs/screenshots/dashboard-desktop.png)
 
+## The problem
+
+Operations teams coordinate work across several projects at once. When the board is stale, people ask "who is on this?"
+in chat, duplicate work, and lose track of what changed and when. Nexora keeps one shared, live view per team: every
+change appears for everyone in the workspace immediately and is recorded in an activity log. Each team's data is
+strictly isolated from other teams on the same server.
+
 ## Features
 
 - **Accounts** — register / sign in with bcrypt-hashed passwords and short-lived JWT access tokens.
@@ -83,6 +90,17 @@ API docs: http://localhost:3000/api/docs · Health: http://localhost:3000/api/v1
 API integration tests use the `nexora_test` database and E2E uses `nexora_e2e`; neither touches your development data. Both are created automatically on first run.
 
 First E2E run: `pnpm --filter @nexora/web exec playwright install chromium`.
+
+## Testing
+
+| Layer | Tooling | What it covers |
+| --- | --- | --- |
+| API unit | Jest | configuration policy, error mapping, slugs, enum parity with shared contracts |
+| API integration | Jest + Supertest + Socket.IO client, real PostgreSQL | auth, workspaces, projects, tasks, activity, realtime rooms, and a **tenant-isolation matrix** (User B is denied every read/write on User A's workspace, project and task; cross-workspace assignees are rejected) |
+| Web | Vitest + React Testing Library | forms and validation, API error display, route guards, board loading/empty/error states, task create/edit/move/delete, realtime cache merging, dialogs |
+| E2E | Playwright + axe-core | full user journey, two-browser realtime, tenant isolation by URL, WCAG 2.1 AA audit of every screen, keyboard use, mobile (375 px) |
+
+The E2E suite runs the built API and the production web bundle against an isolated database.
 
 ## Configuration
 
