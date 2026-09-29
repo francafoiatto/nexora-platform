@@ -162,8 +162,21 @@ console errors ✔ · realtime validated (tests + two-browser E2E) ✔ · respon
 
 `.github/workflows/ci.yml`: `validate` (install → prisma generate → lint → typecheck → test with a PostgreSQL service →
 build) and `e2e` (Playwright + Chromium, report artifact on failure); least-privilege permissions, concurrency cancel.
-**Not executed on GitHub** (publication was out of scope). Its steps were reproduced locally on Node 24 / Windows. The
-workflow targets Node 22 on Linux, which was not exercised.
+At the time of this report it had **not been executed on GitHub** (publication was out of scope); its steps were
+reproduced locally on Node 24 / Windows.
+
+**Update — GitHub CI validation (after this report, following publication on 2026-09-29):**
+
+| | |
+| --- | --- |
+| GitHub Actions CI | **PASS** |
+| Run | [36633167601](https://github.com/francafoiatto/nexora-platform/actions/runs/36633167601) |
+| Commit | `09df98b0995bcf5314b9bf65523e696201554db9` |
+| Environment | ubuntu-24.04, Node v22.23.2, PostgreSQL 16 service container |
+| Unit/Integration | 138 PASS (API 92, web 40, contracts 6) |
+| Playwright E2E | 7 PASS |
+
+This first real run confirmed Node 22 / Linux compatibility. No CI correction was needed.
 
 ## 16. Documentation
 
@@ -192,7 +205,7 @@ Git config (the global config is unchanged).
 - Members cannot be removed and roles cannot be changed; no invitations for users without an account; no password reset or email verification.
 - Task lists are capped at 500 per project (no per-column pagination); no drag-and-drop (status changes via the card select, keyboard-accessible).
 - Dark theme only. The web bundle is 505 kB (159 kB gzip) without route splitting.
-- CI not executed on GitHub; Node 22/Linux not exercised locally.
+- ~~CI not executed on GitHub; Node 22/Linux not exercised locally.~~ Resolved later: GitHub CI passed on Node 22 / ubuntu-24.04 (see §15).
 
 ## 20. Technical Debt
 
