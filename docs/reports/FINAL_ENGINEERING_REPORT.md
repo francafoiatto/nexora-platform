@@ -55,7 +55,8 @@ PostgreSQL (Docker). No Redis, queues, cloud services or microservices. Details:
 - Database: `migration_lock.toml`, incremental `0002_index_hardening`, idempotent and safe seed.
 - Tooling: real ESLint, Jest unit + integration projects, Vitest/RTL, Playwright E2E (+ axe), CI workflow, `.gitattributes`.
 - Docs: README, architecture, security model, API/realtime reference, revised ADRs, SECURITY.md, screenshots.
-- Git: two commits, first the pristine V1 import and then v0.2, so every change is reviewable as a diff.
+- Git: the pristine V1 import, then v0.2, so every change is reviewable as a diff; a third commit records the
+  pre-publication identity and license review (§22).
 
 Bugs found and fixed during validation (each now covered by a test):
 - Delete-task confirmation was unreachable: the edit dialog's programmatic close was reported back as a user close.
@@ -180,8 +181,9 @@ seeded fictional data; reproducible via `apps/web/scripts/capture-screenshots.mj
 
 ## 18. Git Status
 
-Local repository only: branch `main`, two commits (V1 import, v0.2). `git remote -v` → empty. Working tree clean.
-Commits use your global Git identity (name and email); a public push would publish that email in the history.
+Local repository only, branch `main`, `git remote -v` → empty, working tree clean. After the pre-publication review (§22)
+every commit's author and committer is `Robson França Foiatto <robson@francafoiatto.com>`, set in the repository's local
+Git config (the global config is unchanged).
 
 ## 19. Known Limitations
 
@@ -200,11 +202,27 @@ optional `@db.Uuid` column types (ids are UUIDs stored as `text`); type-aware ES
 
 ## 21. Recommended Next Steps
 
-1. Decide the Git author identity and copyright holder to use publicly, then create the repository and let CI run on GitHub.
+1. After the human publication review, create the repository and let CI run on GitHub (identity and copyright are settled, §22).
 2. Add refresh tokens and a CSP header on the static host before real users.
 3. Add member management and invitations.
 4. Add route-based code splitting and per-column pagination.
 5. Prepare deployment (container image, managed PostgreSQL, `migrate deploy` release step), still per ADR-006.
+
+## 22. Pre-Publication Identity & License Review (2026-09-29)
+
+- **Git identity** (repository-local config only): `Robson França Foiatto <robson@francafoiatto.com>`.
+- **History rewrite** (local, never pushed): `git filter-branch --env-filter` changed only the author and committer of both
+  existing commits. Trees, messages, order and dates are identical (verified), and only the hashes changed:
+  `f0c9852 → 47956c6` (V1 import), `2c78636 → b2c3dbf` (v0.2). The `refs/original` backup and the reflog were removed and
+  unreachable objects pruned, so the old commit objects no longer exist locally. This review is recorded in a third commit.
+- **Legacy identity**: the previous author email existed only in commit metadata. After the rewrite it is absent from all
+  files, current and historical, and from all commit metadata.
+- **Copyright**: `LICENSE` → `Copyright (c) 2026 Robson França Foiatto`; the MIT text is unchanged. The V1 import commit keeps
+  V1's original `LICENSE` as part of the unmodified V1 snapshot. No package manifest has an author field.
+- **Re-validation after the rewrite**: `pnpm lint` → 0, `pnpm typecheck` → 0, `pnpm test` → 0 (138 tests: API 92, web 40,
+  contracts 6), `pnpm build` → 0. **E2E was not re-run**: only `LICENSE` and this report changed, and neither is
+  functional. The E2E results in §13 are from the earlier run.
+- **Gitleaks after the rewrite**: full history and current tree scanned, no leaks.
 
 ---
 
@@ -232,5 +250,5 @@ DEPLOYMENT PERFORMED = NO
 
 PUBLIC RELEASE READY = PASS
 
-The code, tests and documentation are ready to publish, with the documented limitations. Before publishing, decide the
-public Git identity and copyright holder (§18, §21).
+The code, tests and documentation are ready to publish, with the documented limitations. The Git identity and copyright
+holder were settled in the pre-publication review (§22).
