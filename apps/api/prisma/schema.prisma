@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+enum WorkspaceRole {
+  OWNER
+  MEMBER
+}
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  passwordHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memberships WorkspaceMember[]
+  createdTasks Task[] @relation("createdTasks")
+  assignedTasks Task[] @relation("assignedTasks")
+  activities Activity[]
+}
+model Workspace {
+  id String @id @default(uuid())
+  name String
+  slug String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  members WorkspaceMember[]
+  projects Project[]
+  activities Activity[]
+  @@index([slug])
+}
+model WorkspaceMember {
+  workspaceId String
+  userId String
+  role WorkspaceRole @default(MEMBER)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([workspaceId, userId])
+  @@index([userId])
+}
+model Project {
+  id String @id @default(uuid())
+  workspaceId String
+  name String
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  tasks Task[]
+  @@index([workspaceId])
+}
+model Task {
+  id String @id @default(uuid())
+  projectId String
+  title String
+  description String?
+  status TaskStatus @default(TODO)
+  priority Priority @default(MEDIUM)
+  assigneeId String?
+  createdById String
+  dueDate DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee User? @relation("assignedTasks", fields: [assigneeId], references: [id])
+  createdBy User @relation("createdTasks", fields: [createdById], references: [id])
+  @@index([projectId, status])
+  @@index([assigneeId])
+}
+model Activity {
+  id String @id @default(uuid())
+  workspaceId String
+  actorId String
+  entityType String
+  entityId String
+  action String
+  metadata Json?
+  createdAt DateTime @default(now())
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actor User @relation(fields: [actorId], references: [id])
+  @@index([workspaceId, createdAt])
+}
