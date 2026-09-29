@@ -4,11 +4,13 @@ services:
     container_name: nexora-postgres
     restart: unless-stopped
     environment:
+      # Local development credentials only. Never reuse outside this container.
       POSTGRES_USER: nexora
       POSTGRES_PASSWORD: nexora
       POSTGRES_DB: nexora
     ports:
-      - "5432:5432"
+      # Bound to IPv4 loopback only: the database is not reachable from the network.
+      - "127.0.0.1:5432:5432"
     volumes:
       - nexora_pgdata:/var/lib/postgresql/data
     healthcheck:

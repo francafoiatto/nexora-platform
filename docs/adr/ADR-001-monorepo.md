@@ -1,13 +1,25 @@
-# ADR-000: Monorepo
+# ADR-001: pnpm monorepo
+
+- Status: Accepted (revised in v0.2)
 
 ## Context
-Nexora V1 needs a coherent candidate foundation.
+
+The web app and API evolve together and share a vocabulary (task statuses, priorities, payload shapes, realtime events).
 
 ## Decision
-Use pnpm workspaces for web, api and shared contracts.
+
+One pnpm workspace with `apps/web`, `apps/api` and a single shared package, `packages/contracts`, consumed as TypeScript
+source. Shared tooling lives at the root (`eslint.config.mjs`, `tsconfig.base.json`).
+
+In v0.2 the empty `packages/tsconfig` and `packages/eslint-config` placeholders from V1 were removed: a package is only
+added when it carries real shared code.
 
 ## Alternatives
-Separate repositories.
+
+- Separate repositories — more coordination overhead for a two-app product.
+- Turborepo/Nx — not needed at this size; `pnpm -r` is sufficient.
 
 ## Consequences
-Simpler local coordination; CI must understand workspace boundaries.
+
+- One lockfile, one CI pipeline.
+- `contracts` has no build step; the API only uses it in tests (enum-parity check) to avoid compiling a foreign rootDir.

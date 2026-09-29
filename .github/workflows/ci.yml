@@ -1,22 +1,73 @@
 name: ci
+
 on:
   push:
+    branches: [main]
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Integration tests and E2E each use their own database on the service container.
+  TEST_DATABASE_URL: postgresql://nexora:nexora@127.0.0.1:5432/nexora_test?schema=public
+  E2E_DATABASE_URL: postgresql://nexora:nexora@127.0.0.1:5432/nexora_e2e?schema=public
+
 jobs:
   validate:
+    name: lint · typecheck · test · build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16-alpine
         env: { POSTGRES_USER: nexora, POSTGRES_PASSWORD: nexora, POSTGRES_DB: nexora }
-        ports: ["5432:5432"]
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nexora -d nexora"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: { version: 9.15.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+      - run: pnpm db:generate
+      - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm build
+
+  e2e:
+    name: e2e (Playwright)
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: nexora, POSTGRES_PASSWORD: nexora, POSTGRES_DB: nexora }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nexora -d nexora"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm --filter @nexora/web exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+        env: { CI: 'true' }
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7

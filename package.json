@@ -1,5 +1,33 @@
 {
-  "name":"nexora-platform","private":true,"version":"0.1.0","packageManager":"pnpm@9.15.0",
-  "scripts":{"dev":"pnpm --parallel --filter @nexora/web --filter @nexora/api dev","build":"pnpm -r build","lint":"pnpm -r lint","typecheck":"pnpm -r typecheck","test":"pnpm -r test","test:e2e":"pnpm --filter @nexora/web test:e2e","db:generate":"pnpm --filter @nexora/api prisma:generate","db:migrate":"pnpm --filter @nexora/api prisma:migrate","db:seed":"pnpm --filter @nexora/api prisma:seed"},
-  "devDependencies":{"typescript":"^5.7.3"}
+  "name": "nexora-platform",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Nexora — real-time operations platform for teams (pnpm monorepo: React + NestJS + PostgreSQL).",
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @nexora/web --filter @nexora/api dev",
+    "build": "pnpm -r build",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @nexora/web test:e2e",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter @nexora/api prisma:generate",
+    "db:migrate": "pnpm --filter @nexora/api prisma:migrate",
+    "db:seed": "pnpm --filter @nexora/api prisma:seed",
+    "validate": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^15.15.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.59.1"
+  }
 }

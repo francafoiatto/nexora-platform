@@ -1,10 +1,31 @@
+# dependencies
 node_modules
+
+# build output
 dist
 build
+*.tsbuildinfo
+
+# test output
 coverage
-.env
-.env.local
 playwright-report
 test-results
+blob-report
+.vitest-cache
+
+# environment (only *.env.example is tracked)
+.env
+.env.*
+!.env.example
+
+# logs / debug
 *.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editor / OS
 .DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json
