@@ -237,6 +237,24 @@ optional `@db.Uuid` column types (ids are UUIDs stored as `text`); type-aware ES
   functional. The E2E results in §13 are from the earlier run.
 - **Gitleaks after the rewrite**: full history and current tree scanned, no leaks.
 
+## 23. Publication and Production Deployment (2026-09-29 / 2026-09-30, after the sections above)
+
+- **Published:** https://github.com/francafoiatto/nexora-platform (public). The first GitHub CI passed on Node 22 / ubuntu-24.04 (§15).
+- **Production readiness changes** (all CI-green before deployment):
+  - `TRUST_PROXY`: behind Railway's proxy all clients shared one rate-limit bucket;
+  - `HOST`;
+  - API Dockerfile and a migrate-then-start entrypoint (Railway did not run the configured pre-deploy step);
+  - Socket.IO URL derived from `VITE_API_URL`;
+  - Pages `_redirects` and CSP `_headers`;
+  - `railway.json` watch patterns covering every API image input.
+- **Infrastructure:**
+  - Railway project `nexora-platform`: `api` deployed from GitHub `main` with Wait for CI, and `Postgres` on the private network with volume `postgres-volume`;
+  - Cloudflare Pages `nexora-platform` on `nexora-platform-dwy.pages.dev`, no custom domain.
+- **Migrations:** `0001_init` and `0002_index_hardening` applied by `prisma migrate deploy`; the production seed was never run.
+- **Verified in production:** smoke, realtime over WSS, tenant isolation (HTTP and socket), CORS, HTTPS, 4 viewports and
+  log review. See `docs/deployment.md`, section "Production verification".
+- **Known limitations remain:** single API instance (in-memory rate limiting and Socket.IO rooms), access token in `localStorage`.
+
 ---
 
 ## Gate Matrix
@@ -254,10 +272,14 @@ optional `@db.Uuid` column types (ids are UUIDs stored as `text`); type-aware ES
 
 ## Publication State
 
-REPOSITORY PUBLISHED = NO
-GIT REMOTE CONFIGURED = NO
-REMOTE PUSH PERFORMED = NO
-DEPLOYMENT PERFORMED = NO
+At the time of the original report: REPOSITORY PUBLISHED = NO, GIT REMOTE CONFIGURED = NO, REMOTE PUSH PERFORMED = NO,
+DEPLOYMENT PERFORMED = NO.
+
+Current (see §23):
+
+REPOSITORY PUBLISHED = YES (public)
+GITHUB CI = PASS
+DEPLOYMENT PERFORMED = YES (Cloudflare Pages + Railway)
 
 ## Final Verdict
 

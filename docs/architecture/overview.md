@@ -16,7 +16,17 @@ PostgreSQL 16
 Locally, PostgreSQL runs in Docker Compose (bound to `127.0.0.1`). In development the Vite server proxies `/api` and
 `/socket.io` to the API, so the browser talks to a single origin. No other infrastructure (Redis, queues, cloud services)
 is required. A possible production topology (static web host + one API container + managed PostgreSQL) is described in
-[ADR-006](../adr/ADR-006-local-and-production-infrastructure.md); nothing is provisioned.
+[ADR-006](../adr/ADR-006-local-and-production-infrastructure.md).
+
+| | Local | Production |
+| --- | --- | --- |
+| Web | Vite dev server (proxies `/api`, `/socket.io`) | Cloudflare Pages (static build, CSP headers) |
+| API | `nest start --watch` | Railway container (Dockerfile), 1 replica, HTTPS/WSS |
+| Database | PostgreSQL in Docker Compose (`127.0.0.1`) | Railway PostgreSQL, private network only |
+| Migrations | `pnpm db:migrate` | `prisma migrate deploy` in the container entrypoint |
+
+Current production limits: 1 API instance, in-memory rate limiting, single-instance Socket.IO, and the access token in
+`localStorage`. Details: [docs/deployment.md](../deployment.md).
 
 ## Monorepo
 

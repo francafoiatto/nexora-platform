@@ -10,7 +10,7 @@ The project must run fully locally, with no cloud side effects, while keeping a 
 
 - Local: Docker Compose PostgreSQL 16 bound to `127.0.0.1`; API and web run with Node.js.
 - Tests use isolated databases on the same server: `nexora_test` (API integration) and `nexora_e2e` (Playwright).
-- Production target (not provisioned): static hosting for `apps/web/dist`, one container for `apps/api`
+- Production (provisioned 2026-09-30 on Cloudflare Pages and Railway, see `docs/deployment.md`): static hosting for `apps/web/dist`, one container for `apps/api`
   (`node dist/main.js`, `NODE_ENV=production`, explicit `CORS_ORIGINS`, JSON logs), managed PostgreSQL with
   `prisma migrate deploy` run as a release step.
 

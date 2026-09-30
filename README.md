@@ -136,7 +136,16 @@ Tenant isolation is enforced server-side on every request (task → project → 
 
 ## Project status
 
-v0.2 — a hardened, tested foundation. Not deployed anywhere. Known limitations and next steps are tracked in [docs/reports/FINAL_ENGINEERING_REPORT.md](docs/reports/FINAL_ENGINEERING_REPORT.md).
+v0.2, deployed as a showcase:
+
+- **Web:** https://nexora-platform-dwy.pages.dev (Cloudflare Pages)
+- **API:** https://api-production-547f.up.railway.app, docs at [`/api/docs`](https://api-production-547f.up.railway.app/api/docs) (Railway, PostgreSQL on Railway's private network)
+
+Pushes to `main` redeploy the API only after GitHub Actions passes. How it is deployed and verified:
+[docs/deployment.md](docs/deployment.md).
+
+Known limitations (single API instance: in-memory rate limiting and Socket.IO rooms; access token in `localStorage`) and
+next steps are tracked in [docs/reports/FINAL_ENGINEERING_REPORT.md](docs/reports/FINAL_ENGINEERING_REPORT.md).
 
 ## License
 
