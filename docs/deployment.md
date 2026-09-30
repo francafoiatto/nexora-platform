@@ -53,9 +53,14 @@ caching for hashed assets).
 
 ## Railway (API)
 
+- **Source:** GitHub `francafoiatto/nexora-platform`, branch `main`, with **Wait for CI** (check suites) enabled. A push to
+  `main` deploys only after the GitHub Actions checks succeed.
 - **Build:** `apps/api/Dockerfile` (context = repository root; installs only the API workspace, generates the Prisma client,
-  builds). Service variable `RAILWAY_DOCKERFILE_PATH=apps/api/Dockerfile` selects it. [`railway.json`](../railway.json)
-  declares the same for GitHub-linked deployments, but Railway did not apply the config file to CLI (`railway up`) uploads.
+  builds). Service variable `RAILWAY_DOCKERFILE_PATH=apps/api/Dockerfile` selects it.
+- **Service settings vs `railway.json`:** on both CLI uploads and GitHub deployments, Railway recognised the
+  [`railway.json`](../railway.json) fields but did not apply its values (an empty parsed file manifest, no health check). The
+  effective settings therefore live on the service: Dockerfile via the variable above, health check `/api/v1/health`
+  (timeout 120 s), 1 replica. `railway.json` documents the intended values.
 - **Migrations:** the container entrypoint ([`apps/api/scripts/start-production.sh`](../apps/api/scripts/start-production.sh))
   runs `prisma migrate deploy` and then `exec`s the API. It only applies pending migrations and never resets data. It is
   idempotent and lock-protected, so it lives in the image rather than in platform settings. The demo seed is **never**
