@@ -53,13 +53,15 @@ caching for hashed assets).
 
 ## Railway (API)
 
-Configured by [`railway.json`](../railway.json):
-
-- **Build:** `apps/api/Dockerfile` (context = repository root; installs only the API workspace, generates the Prisma client, builds).
-- **Pre-deploy:** `prisma migrate deploy` runs once per deployment, before the new version receives traffic. It only
-  applies pending migrations; it never resets data. The demo seed is **never** run in production (the seed also refuses `NODE_ENV=production`).
-- **Start:** `node apps/api/dist/main.js`.
+- **Build:** `apps/api/Dockerfile` (context = repository root; installs only the API workspace, generates the Prisma client,
+  builds). Service variable `RAILWAY_DOCKERFILE_PATH=apps/api/Dockerfile` selects it. [`railway.json`](../railway.json)
+  declares the same for GitHub-linked deployments, but Railway did not apply the config file to CLI (`railway up`) uploads.
+- **Migrations:** the container entrypoint ([`apps/api/scripts/start-production.sh`](../apps/api/scripts/start-production.sh))
+  runs `prisma migrate deploy` and then `exec`s the API. It only applies pending migrations and never resets data. It is
+  idempotent and lock-protected, so it lives in the image rather than in platform settings. The demo seed is **never**
+  run in production (the seed also refuses `NODE_ENV=production`).
 - **Health check:** `GET /api/v1/health` (200 when the database is reachable, 503 otherwise).
+- **Database network:** PostgreSQL is reachable only on Railway's private network (no public TCP proxy).
 - **Replicas:** 1. See the limitations below.
 - **Shutdown:** SIGTERM triggers Nest shutdown hooks (HTTP server and Prisma disconnect); verified to exit 0.
 
