@@ -6,7 +6,12 @@
     "watchPatterns": [
       "apps/api/**",
       "packages/contracts/**",
+      "package.json",
       "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      ".npmrc",
+      "tsconfig.base.json",
+      ".dockerignore",
       "railway.json"
     ]
   },

@@ -57,10 +57,13 @@ caching for hashed assets).
   `main` deploys only after the GitHub Actions checks succeed.
 - **Build:** `apps/api/Dockerfile` (context = repository root; installs only the API workspace, generates the Prisma client,
   builds). Service variable `RAILWAY_DOCKERFILE_PATH=apps/api/Dockerfile` selects it.
-- **Service settings vs `railway.json`:** on both CLI uploads and GitHub deployments, Railway recognised the
-  [`railway.json`](../railway.json) fields but did not apply its values (an empty parsed file manifest, no health check). The
-  effective settings therefore live on the service: Dockerfile via the variable above, health check `/api/v1/health`
-  (timeout 120 s), 1 replica. `railway.json` documents the intended values.
+- **Service settings and `railway.json`:** GitHub-triggered deployments apply [`railway.json`](../railway.json). A docs-only
+  push was correctly skipped with "No changes to watched files". CLI uploads (`railway up`) and the deployment created
+  when the source was connected did not apply it. The same values are therefore also set on the service: health check
+  `/api/v1/health` (timeout 120 s), Dockerfile via the variable above.
+- **Watch patterns:** every input copied into the API image (`apps/api/**`, `packages/contracts/**`, root
+  `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, `tsconfig.base.json`, `.dockerignore`) plus
+  `railway.json`. Changes elsewhere (web, docs) do not redeploy the API.
 - **Migrations:** the container entrypoint ([`apps/api/scripts/start-production.sh`](../apps/api/scripts/start-production.sh))
   runs `prisma migrate deploy` and then `exec`s the API. It only applies pending migrations and never resets data. It is
   idempotent and lock-protected, so it lives in the image rather than in platform settings. The demo seed is **never**
