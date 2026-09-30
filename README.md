@@ -146,6 +146,7 @@ Pushes to `main` redeploy the API only after GitHub Actions passes. How it is de
 
 Known limitations (single API instance: in-memory rate limiting and Socket.IO rooms; access token in `localStorage`) and
 next steps are tracked in [docs/reports/FINAL_ENGINEERING_REPORT.md](docs/reports/FINAL_ENGINEERING_REPORT.md).
+V1 baseline, operations and resume checklist: [docs/V1_HANDOFF.md](docs/V1_HANDOFF.md).
 
 ## License
 

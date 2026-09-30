@@ -215,11 +215,13 @@ optional `@db.Uuid` column types (ids are UUIDs stored as `text`); type-aware ES
 
 ## 21. Recommended Next Steps
 
-1. After the human publication review, create the repository and let CI run on GitHub (identity and copyright are settled, §22).
-2. Add refresh tokens and a CSP header on the static host before real users.
+1. ~~Create the repository and let CI run on GitHub.~~ Done (§15, §23).
+2. Add refresh tokens before real users. ~~A CSP header on the static host~~ was done in §23.
 3. Add member management and invitations.
 4. Add route-based code splitting and per-column pagination.
-5. Prepare deployment (container image, managed PostgreSQL, `migrate deploy` release step), still per ADR-006.
+5. ~~Prepare deployment.~~ Done (§23).
+
+These remaining items are post-V1 work; V1 is closed (see `docs/V1_HANDOFF.md`).
 
 ## 22. Pre-Publication Identity & License Review (2026-09-29)
 
@@ -254,6 +256,13 @@ optional `@db.Uuid` column types (ids are UUIDs stored as `text`); type-aware ES
 - **Verified in production:** smoke, realtime over WSS, tenant isolation (HTTP and socket), CORS, HTTPS, 4 viewports and
   log review. See `docs/deployment.md`, section "Production verification".
 - **Known limitations remain:** single API instance (in-memory rate limiting and Socket.IO rooms), access token in `localStorage`.
+
+## 24. V1 Closure (2026-09-30)
+
+Final read-only inspection found no drift from §23. Re-validated: `pnpm install --frozen-lockfile`, lint, typecheck,
+test (143 tests: API 95, web 42, contracts 6), build, E2E 7/7 on the local isolated database, and Gitleaks on the history
+and tracked tree. The production application baseline is `24b8cbb` (API and web). Later commits are documentation only.
+Handoff: `docs/V1_HANDOFF.md`.
 
 ---
 
