@@ -1,4 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -13,6 +14,7 @@ export const API_PREFIX = 'api/v1';
 export function configureApp(app: INestApplication): AppConfig {
   const config = app.get<AppConfig>(APP_CONFIG);
 
+  if (config.trustProxy > 0) (app as NestExpressApplication).set('trust proxy', config.trustProxy);
   app.setGlobalPrefix(API_PREFIX);
   // JSON API: a CSP only matters for HTML documents, which are served by the web host (and Swagger UI in dev).
   app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));

@@ -22,9 +22,9 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, { logger: logFormat === 'json' ? new JsonLogger() : undefined });
   const config = configureApp(app);
-  await app.listen(config.port);
+  await app.listen(config.port, config.host);
   Logger.log(
-    `API listening on :${config.port} (${config.nodeEnv})${config.swaggerEnabled ? ' — docs at /api/docs' : ''}`,
+    `API listening on ${config.host}:${config.port} (${config.nodeEnv}, trust proxy hops: ${config.trustProxy})${config.swaggerEnabled ? ' — docs at /api/docs' : ''}`,
     'Bootstrap',
   );
 }

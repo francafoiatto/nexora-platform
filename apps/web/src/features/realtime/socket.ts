@@ -1,5 +1,6 @@
 import type { JoinAck, RealtimeEvents } from '@nexora/contracts';
 import { io, type Socket } from 'socket.io-client';
+import { API_ORIGIN } from '../../lib/api-client';
 import { session } from '../../lib/session';
 
 type ServerToClient = { [K in keyof RealtimeEvents]: (payload: RealtimeEvents[K]) => void };
@@ -9,8 +10,11 @@ interface ClientToServer {
 }
 export type RealtimeSocket = Socket<ServerToClient, ClientToServer>;
 
-/** Empty = same origin (Vite proxies /socket.io in development). */
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || undefined;
+/**
+ * Socket.IO is served by the API process, so by default it uses the API's origin (VITE_API_URL).
+ * VITE_SOCKET_URL overrides it; undefined = same origin (Vite proxies /socket.io in development).
+ */
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_ORIGIN;
 
 let socket: RealtimeSocket | null = null;
 

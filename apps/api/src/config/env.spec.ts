@@ -18,6 +18,7 @@ describe('parseConfig', () => {
     expect(parseConfig(base)).toEqual({
       nodeEnv: 'development',
       port: 3000,
+      host: '0.0.0.0',
       databaseUrl: base.DATABASE_URL,
       jwtSecret: SECRET,
       jwtExpiresIn: '2h',
@@ -25,6 +26,7 @@ describe('parseConfig', () => {
       swaggerEnabled: true,
       logFormat: 'pretty',
       authRateLimit: 10,
+      trustProxy: 0,
     });
   });
 
@@ -50,6 +52,11 @@ describe('parseConfig', () => {
     expect(config.corsOrigins).toEqual(['https://app.example.com', 'https://admin.example.com']);
     expect(config.swaggerEnabled).toBe(false);
     expect(config.logFormat).toBe('json');
+  });
+
+  it('trusts no proxy unless the hop count is declared', () => {
+    expect(parseConfig({ ...base, TRUST_PROXY: '1' }).trustProxy).toBe(1);
+    expect(problemsOf({ ...base, TRUST_PROXY: 'true' })).toEqual(['TRUST_PROXY must be an integer between 0 and 5']);
   });
 
   it('refuses wildcard CORS', () => {

@@ -6,6 +6,7 @@ export type NodeEnv = 'development' | 'test' | 'production';
 export interface AppConfig {
   nodeEnv: NodeEnv;
   port: number;
+  host: string;
   databaseUrl: string;
   jwtSecret: string;
   jwtExpiresIn: string;
@@ -13,6 +14,8 @@ export interface AppConfig {
   swaggerEnabled: boolean;
   logFormat: 'pretty' | 'json';
   authRateLimit: number;
+  /** Number of reverse-proxy hops to trust for client IP (Express "trust proxy"); 0 = trust none. */
+  trustProxy: number;
 }
 
 export class ConfigError extends Error {
@@ -87,6 +90,14 @@ export function parseConfig(env: NodeJS.ProcessEnv): AppConfig {
   const authRateLimit = Number(env.AUTH_RATE_LIMIT ?? 10);
   if (!Number.isInteger(authRateLimit) || authRateLimit < 1) problems.push('AUTH_RATE_LIMIT must be a positive integer');
 
+  const host = env.HOST?.trim() || '0.0.0.0';
+
+  // Behind a platform proxy (e.g. Railway) every request arrives from the proxy's address. Trusting exactly the
+  // declared number of hops lets req.ip (used for rate limiting) be the real client, without trusting spoofable
+  // X-Forwarded-For entries added by the client itself.
+  const trustProxy = Number(env.TRUST_PROXY ?? 0);
+  if (!Number.isInteger(trustProxy) || trustProxy < 0 || trustProxy > 5) problems.push('TRUST_PROXY must be an integer between 0 and 5');
+
   if (problems.length) throw new ConfigError(problems);
-  return { nodeEnv, port, databaseUrl, jwtSecret, jwtExpiresIn, corsOrigins, swaggerEnabled, logFormat, authRateLimit };
+  return { nodeEnv, port, host, databaseUrl, jwtSecret, jwtExpiresIn, corsOrigins, swaggerEnabled, logFormat, authRateLimit, trustProxy };
 }

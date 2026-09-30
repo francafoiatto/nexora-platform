@@ -4,6 +4,9 @@ import { session } from './session';
 
 export const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
+/** Origin of a separately hosted API (e.g. https://api.example.com), or undefined when same-origin/proxied. */
+export const API_ORIGIN = /^https?:\/\//.test(API_URL) ? new URL(API_URL).origin : undefined;
+
 /** Normalized error thrown by every API call. */
 export class ApiError extends Error {
   constructor(

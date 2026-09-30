@@ -132,3 +132,41 @@ describe('auth rate limiting', () => {
     expect(blocked.body.code).toBe('RATE_LIMITED');
   });
 });
+
+describe('rate limiting behind a proxy', () => {
+  const previous = { limit: process.env.AUTH_RATE_LIMIT, proxy: process.env.TRUST_PROXY };
+  afterEach(() => {
+    process.env.AUTH_RATE_LIMIT = previous.limit;
+    process.env.TRUST_PROXY = previous.proxy;
+  });
+
+  const attempt = (ctx: TestContext, clientIp: string) =>
+    ctx.http().post(path('/auth/login')).set('X-Forwarded-For', clientIp).send({ email: 'ghost@example.test', password: 'nope-nope' });
+
+  it('with TRUST_PROXY=1 each client IP gets its own bucket', async () => {
+    process.env.AUTH_RATE_LIMIT = '2';
+    process.env.TRUST_PROXY = '1';
+    const ctx = await createTestApp();
+    try {
+      for (let i = 0; i < 2; i++) expect((await attempt(ctx, '203.0.113.10')).status).toBe(401);
+      expect((await attempt(ctx, '203.0.113.10')).status).toBe(429);
+      // A different real client behind the same proxy is not blocked by the first one.
+      expect((await attempt(ctx, '198.51.100.20')).status).toBe(401);
+    } finally {
+      await ctx.app.close();
+    }
+  });
+
+  it('without a trusted proxy a spoofed X-Forwarded-For does not bypass the limit', async () => {
+    process.env.AUTH_RATE_LIMIT = '2';
+    delete process.env.TRUST_PROXY;
+    const ctx = await createTestApp();
+    try {
+      expect((await attempt(ctx, '203.0.113.1')).status).toBe(401);
+      expect((await attempt(ctx, '203.0.113.2')).status).toBe(401);
+      expect((await attempt(ctx, '203.0.113.3')).status).toBe(429);
+    } finally {
+      await ctx.app.close();
+    }
+  });
+});
