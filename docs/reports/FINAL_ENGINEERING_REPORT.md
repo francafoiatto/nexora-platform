@@ -1,6 +1,6 @@
 # NEXORA — FINAL ENGINEERING REPORT
 
-Date: 2026-09-29 · Scope: V1 intake, audit and correction; Golden Path G0–G7 · Environment: Windows 11, Node 24.15.0,
+Date: 2026-09-29 · Scope: V1 intake, audit and correction; gated delivery G0–G7 · Environment: Windows 11, Node 24.15.0,
 pnpm 9.15.0, Docker 29.8.0 / Compose 5.5.1, PostgreSQL 16 (container).
 
 ## 1. Executive Summary

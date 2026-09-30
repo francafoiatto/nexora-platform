@@ -44,7 +44,8 @@ It also serves as a public showcase of full-stack engineering and production pra
 | API | Railway, project `nexora-platform`, env `production`, service `api` (1 replica) | https://api-production-547f.up.railway.app (`/api/docs`, `/api/v1/health`) |
 | Database | Railway PostgreSQL, service `Postgres`, volume `postgres-volume` | private network only |
 
-- The Railway workspace also contains unrelated projects. NEXORA is isolated at project level (own services, database, volume and secrets) and must never touch them.
+- NEXORA runs in its own Railway project, with its own services, database, volume and secrets. Operations must stay
+  scoped to that project.
 - No custom domain, and no other Cloudflare products.
 
 ## CI/CD
@@ -111,11 +112,11 @@ engineering report §19–§21.
 A possible evolution of NEXORA into an **Engineering Operations Hub**:
 
 - GitHub integration: repositories, PR monitoring, CI and deployment status;
-- Golden Path tracking and engineering gates;
+- delivery workflow tracking with engineering gates and evidence;
 - agent-assisted operational updates;
 - multi-project operational dashboards.
 
-A candidate first internal integration is ANTHEVO.
+A candidate first integration is a private internal product.
 
 **Architectural rule:** NEXORA stays decoupled from the products it observes and integrates only through controlled
 interfaces (APIs, GitHub, webhooks, events). It never depends on another product's private database.
@@ -134,7 +135,8 @@ Before changing anything in a future session:
    - variables by **name** only;
    - Postgres has no public URL.
 3. **Production:** `GET /api/v1/health`; the Pages URL and a deep link return 200; CORS allows only the Pages origin.
-4. **Cloudflare:** `wrangler whoami` (account `nevora2026@outlook.com`), and `wrangler pages deployment list --project-name nexora-platform`.
+4. **Cloudflare:** `wrangler whoami` (confirm the intended account; the account is configured externally), and
+   `wrangler pages deployment list --project-name nexora-platform`.
 5. **Local validation:**
    - `pnpm db:up`
    - `pnpm validate`
@@ -142,6 +144,6 @@ Before changing anything in a future session:
 6. **Rules:**
    - never reset or seed production;
    - never expose Postgres;
-   - never touch other projects in the workspace;
+   - never operate outside the NEXORA project;
    - never add secrets to the repo;
    - never deploy a commit without green CI.
